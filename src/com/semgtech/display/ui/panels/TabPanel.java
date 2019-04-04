@@ -7,30 +7,35 @@ import javax.swing.*;
 public class TabPanel extends JPanel
 {
 
-    private Object tabObject;
-    private TabCloseButton tabCloseButton;
+    private static final String TAB_PANEL_NAME = "%s ";
 
-    public TabPanel(final Object tabObject)
+    // The two objects the tab is responsible for displaying; main panel and side panel, respectively
+    private Object tabObject;
+    private Object sideObject;
+
+    // The button used for closing the tab
+    private TabCloseButton closeButton;
+
+    public TabPanel(final Object tabObject, final Object sideObject)
     {
         this.tabObject = tabObject;
-        initTabPanel();
-    }
+        this.sideObject = sideObject;
 
-    private void initTabPanel()
-    {
         // Create the tab label
-        final JLabel tabNameLabel = new JLabel(String.format("%s  ", tabObject.toString()));
+        final JLabel tabNameLabel = new JLabel(String.format(TAB_PANEL_NAME, tabObject.toString()));
         tabNameLabel.setBorder(BorderFactory.createEmptyBorder());
+        setAlignmentX(LEFT_ALIGNMENT);
 
         // Create the close button for the tab
-        tabCloseButton = new TabCloseButton();
+        closeButton = new TabCloseButton();
+        closeButton.setAlignmentX(RIGHT_ALIGNMENT);
 
         // Create the tab panel itself
         setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
         setOpaque(false);
         setBorder(BorderFactory.createEmptyBorder());
         add(tabNameLabel);
-        add(tabCloseButton);
+        add(closeButton);
     }
 
     public Object getTabObject()
@@ -38,8 +43,13 @@ public class TabPanel extends JPanel
         return tabObject;
     }
 
-    public TabCloseButton getTabCloseButton()
+    public Object getSideObject()
     {
-        return tabCloseButton;
+        return sideObject;
+    }
+
+    public TabCloseButton getCloseButton()
+    {
+        return closeButton;
     }
 }

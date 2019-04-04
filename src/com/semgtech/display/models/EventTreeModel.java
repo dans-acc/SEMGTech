@@ -6,63 +6,77 @@ import com.semgtech.api.utils.signals.events.EventComposite;
 import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
+import java.util.List;
 
 public class EventTreeModel implements TreeModel
 {
 
-    private EventComponent root;
+    private List<?> events;
 
-    public EventTreeModel(final EventComponent root)
+    public EventTreeModel(final List<EventComponent> events)
     {
-        this.root = root;
+        this.events = events;
     }
 
     @Override
     public Object getRoot()
     {
-        return root;
+        return events;
     }
 
     @Override
-    public boolean isLeaf(final Object eventComponent)
+    public boolean isLeaf(final Object eventNode)
     {
-        if (eventComponent instanceof EventComposite)
-            return ((EventComposite) eventComponent).getComponents().isEmpty();
-        return eventComponent instanceof EventComponent;
+        if (eventNode instanceof List && eventNode == events)
+            return events.isEmpty();
+        else if (eventNode instanceof EventComposite)
+            return ((EventComposite) eventNode).getComponents().isEmpty();
+        else
+            return eventNode instanceof EventComponent;
     }
 
     @Override
-    public Object getChild(final Object parentEventComposite,
-                           final int index)
+    public Object getChild(final Object eventNode, final int index)
     {
-        if (!(parentEventComposite instanceof EventComposite))
+        if (eventNode == null || index == -1)
             return null;
-        final EventComposite eventComposite = (EventComposite) parentEventComposite;
-        if (eventComposite.getComponents().isEmpty())
-            return null;
-        return eventComposite.getComponents().get(index);
+        else if (eventNode instanceof EventComposite && !((EventComposite) eventNode).getComponents().isEmpty())
+            return ((EventComposite) eventNode).getComponents().get(index);
+        else if (eventNode instanceof List && eventNode == events)
+            return events.get(index);
+        return null;
     }
 
     @Override
-    public int getChildCount(final Object parentEventComposite)
+    public int getChildCount(final Object eventNode)
     {
-        if (!(parentEventComposite instanceof EventComposite))
+        if (eventNode == null)
             return -1;
-        final EventComposite eventComposite = (EventComposite) parentEventComposite;
-        return eventComposite.getComponents().size();
+        else if (eventNode instanceof EventComposite)
+            return ((EventComposite) eventNode).getComponents().size();
+        else if (eventNode instanceof List && eventNode == events)
+            return events.size();
+        return -1;
     }
 
     @Override
-    public int getIndexOfChild(final Object parentEventComposite,
-                               final Object childEventComponent)
+    public int getIndexOfChild(final Object parentEventNode, final Object childEventNode)
     {
-        if (parentEventComposite == null || childEventComponent == null)
+        if (parentEventNode == null || childEventNode == null)
             return -1;
-        else if (!(parentEventComposite instanceof EventComposite && childEventComponent instanceof EventComponent))
+
+        // Check the appropriate list
+        List<?> eventComponents = null;
+        if (parentEventNode instanceof EventComposite)
+            eventComponents = ((EventComposite) parentEventNode).getComponents();
+        else if (parentEventNode instanceof List && parentEventNode == events)
+            eventComponents = events;
+
+        // Check whether the event is present in the list
+        if (!(childEventNode instanceof EventComponent) || !eventComponents.contains(childEventNode))
             return -1;
-        final EventComposite eventComposite = (EventComposite) parentEventComposite;
-        final EventComponent eventComponent = (EventComponent) childEventComponent;
-        return eventComposite.getComponents().indexOf(eventComponent);
+
+        return eventComponents.indexOf(childEventNode);
     }
 
     @Override

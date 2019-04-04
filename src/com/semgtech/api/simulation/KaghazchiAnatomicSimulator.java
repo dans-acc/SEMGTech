@@ -8,11 +8,10 @@ import com.semgtech.api.utils.signals.Signal;
 
 import javax.sound.sampled.AudioFormat;
 
-public class KaghazchiAnatomicSimulator
-    extends AnatomicSimulator<KaghazchiActionPotential>
+public class KaghazchiAnatomicSimulator extends AnatomicSimulator<KaghazchiActionPotential>
 {
 
-    private static final String DEFAULT_NAME = "Basic Kaghazchi Anatomic Simulator";
+    public static final String DEFAULT_NAME = "Basic Kaghazchi Anatomic Simulator";
 
     private static final float ACTION_POTENTIAL_DURATION_MODIFIER = 6f;
 

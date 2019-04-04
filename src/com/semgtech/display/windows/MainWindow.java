@@ -1,7 +1,7 @@
 package com.semgtech.display.windows;
 
 import com.semgtech.display.ui.panels.ExplorerPanel;
-import com.semgtech.display.ui.panels.ViewerPanel_old;
+import com.semgtech.display.ui.panels.ViewerMainPanel;
 import org.jfree.ui.ApplicationFrame;
 
 import javax.swing.*;
@@ -10,17 +10,17 @@ import java.awt.*;
 public class MainWindow extends ApplicationFrame
 {
 
-    private static final String APPLICATION_TITLE = "SEMGTech";
+    private static final String APPLICATION_FRAME_TITLE = "SEMGTech";
 
     private static MainWindow instance;
 
     // Explorer and viewer instance variables
     private ExplorerPanel explorerPanel;
-    private ViewerPanel_old viewerPanelOld;
+    private ViewerMainPanel viewerMainPanel;
 
     private MainWindow()
     {
-        super(APPLICATION_TITLE);
+        super(APPLICATION_FRAME_TITLE);
         initMainWindowFrame();
     }
 
@@ -36,8 +36,8 @@ public class MainWindow extends ApplicationFrame
                 (int) (screenDimensions.getHeight() / 2)
         ));
         super.setPreferredSize(new Dimension(
-                (int) (screenDimensions.getWidth() * 0.75),
-                (int) (screenDimensions.getHeight() * 0.75)
+                (int) (screenDimensions.getWidth() * 0.85),
+                (int) (screenDimensions.getHeight() * 0.85)
         ));
 
         // Init the main windows content pane
@@ -54,26 +54,19 @@ public class MainWindow extends ApplicationFrame
     {
         // Create the explorer and viewer panels, respectively
         this.explorerPanel = new ExplorerPanel();
-        this.viewerPanelOld = new ViewerPanel_old();
+        this.viewerMainPanel = new ViewerMainPanel();
 
         // Create the main windows content pane
         final JSplitPane contents = new JSplitPane(
                 JSplitPane.HORIZONTAL_SPLIT,
                 this.explorerPanel,
-                this.viewerPanelOld
+                this.viewerMainPanel
         );
         contents.setResizeWeight(0.15);
 
         // Display the contents on the main window
         super.setContentPane(contents);
     }
-
-    /*
-    TODO: Remove low amplitudes from the phase spectrum by discarding low amplitudes
-    TODO: Create a multi-input gui for selecting the simulation model.
-    TODO: Create a multi-selection model option for auto-correlation, and provide the circular feature
-    TODO: Display the information of the signal at import times, create times, etc.
-     */
 
     public static MainWindow getInstance()
     {
@@ -87,23 +80,8 @@ public class MainWindow extends ApplicationFrame
         return explorerPanel;
     }
 
-    public ViewerPanel_old getViewerPanelOld()
+    public ViewerMainPanel getViewerMainPanel()
     {
-        return viewerPanelOld;
-    }
-
-    public void displayObjectPanel(final Object object, final boolean open)
-    {
-        viewerPanelOld.getViewerTabPane().displayObjectPanel(object, open);
-    }
-
-    public void closeObjectPanel(final Object object)
-    {
-        viewerPanelOld.getViewerTabPane().closeObject(object);
-    }
-
-    public void displayObjectInformation(final Object object)
-    {
-        viewerPanelOld.getConsolePane().getConsoleTextPane().displayObjectInformation(object);
+        return viewerMainPanel;
     }
 }

@@ -51,4 +51,10 @@ public abstract class EventComponent
         return timeEnded - timeBegan;
     }
 
+    @Override
+    public String toString()
+    {
+        return name;
+    }
+
 }

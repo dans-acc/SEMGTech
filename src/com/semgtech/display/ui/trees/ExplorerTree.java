@@ -1,5 +1,6 @@
 package com.semgtech.display.ui.trees;
 
+import com.semgtech.api.simulation.AnatomicSimulator;
 import com.semgtech.api.simulation.Electrode;
 import com.semgtech.api.simulation.GaussianAnatomicSimulator;
 import com.semgtech.api.simulation.actionpotential.GaussianActionPotential;
@@ -25,17 +26,11 @@ public class ExplorerTree extends JTree
 
     private ExplorerPanel explorerPanel;
 
-    // The explorer tree controller and popup menu
-    private ExplorerTreeController explorerTreeController;
-
     // The tree model
     private DefaultMutableTreeNode defaultTreeNodeRoot;
-    private DefaultTreeModel defaultTreeModel;
-
-    // The tree selection model
-    private DefaultTreeSelectionModel defaultTreeSelectionModel;
 
     // The trees popup menu
+    private ExplorerTreeController explorerTreeController;
     private ExplorerTreePopup explorerTreePopup;
 
     public ExplorerTree(final ExplorerPanel explorerPanel)
@@ -48,8 +43,7 @@ public class ExplorerTree extends JTree
     {
         // Create the default tree model
         defaultTreeNodeRoot = new DefaultMutableTreeNode();
-        defaultTreeModel = new DefaultTreeModel(defaultTreeNodeRoot);
-        setModel(defaultTreeModel);
+        setModel(new DefaultTreeModel(defaultTreeNodeRoot));
 
         // Init various tree related properties
         setToolTipText(EXPLORER_TREE_TOOLTIP);
@@ -63,6 +57,33 @@ public class ExplorerTree extends JTree
         // Create an instance of the explorer popup menu, and add it
         explorerTreePopup = new ExplorerTreePopup(explorerTreeController);
         add(explorerTreePopup);
+
+        createSignals();
+        createSignals();
+    }
+
+    private void createSignals()
+    {
+        Fibre fibre = new Fibre(new Vector3d(0, 0, 0), 0.5 , 100);
+
+        GaussianActionPotential gap = new GaussianActionPotential(1, 5);
+
+        MotorUnit<GaussianActionPotential> mu = new MotorUnit<>(new Vector3d(0, 0, 0), 4,
+                0, 100, gap);
+        mu.getComponents().add(fibre);
+
+        Muscle<GaussianActionPotential> muscle = new Muscle<GaussianActionPotential>(new Vector3d(0, 0, 0), 10);
+        muscle.getComponents().add(mu);
+
+        Electrode electrode = new Electrode(new Vector3d(0, 0, 0));
+
+        AudioFormat format = new AudioFormat(1000, 16, 1, false, true);
+
+        GaussianAnatomicSimulator simulator = new GaussianAnatomicSimulator(muscle, format);
+
+        LoggedSignal signal = simulator.simulateMuscleSEMG(100, electrode);
+
+        addChildObject(defaultTreeNodeRoot, signal, true);
     }
 
     public ExplorerPanel getExplorerPanel()
@@ -78,6 +99,12 @@ public class ExplorerTree extends JTree
     public ExplorerTreePopup getExplorerTreePopup()
     {
         return explorerTreePopup;
+    }
+
+    @Override
+    public DefaultTreeModel getModel()
+    {
+        return (DefaultTreeModel) super.getModel();
     }
 
     public void addChildObject(final TreePath path, final Object object,
@@ -99,6 +126,6 @@ public class ExplorerTree extends JTree
         // Create a child node and add it
         final DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(object, allowChildren);
         parentNode.add(childNode);
-        defaultTreeModel.reload(parentNode);
+        getModel().reload(parentNode);
     }
 }

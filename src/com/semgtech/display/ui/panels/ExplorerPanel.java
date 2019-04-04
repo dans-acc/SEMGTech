@@ -16,11 +16,7 @@ public class ExplorerPanel extends JPanel
     public ExplorerPanel()
     {
         super(new BorderLayout());
-        initExplorerPanel();
-    }
 
-    private void initExplorerPanel()
-    {
         // Create and add the explorer tree to the explorer panel
         this.explorerTree = new ExplorerTree(this);
 
@@ -40,6 +36,7 @@ public class ExplorerPanel extends JPanel
                 TitledBorder.TOP
         ));
         add(explorerScrollPanel, BorderLayout.CENTER);
+
     }
 
     public ExplorerTree getExplorerTree()

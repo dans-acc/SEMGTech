@@ -240,4 +240,10 @@ public abstract class AnatomicSimulator<T>
                 electrodePosition.getY()
         );
     }
+
+    @Override
+    public String toString()
+    {
+        return name;
+    }
 }

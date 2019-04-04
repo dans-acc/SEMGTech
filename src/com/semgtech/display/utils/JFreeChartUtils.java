@@ -4,6 +4,9 @@ import com.semgtech.api.utils.signals.Signal;
 import com.semgtech.api.utils.signals.correlations.SignalCorrelation;
 import com.semgtech.api.utils.signals.spectrum.MagnitudeSpectrum;
 import com.semgtech.api.utils.signals.spectrum.PhaseSpectrum;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.statistics.HistogramType;
 import org.jfree.data.xy.XYSeries;
@@ -12,9 +15,7 @@ import org.jfree.data.xy.XYSeriesCollection;
 public class JFreeChartUtils
 {
 
-
-    public static XYSeriesCollection createSignalXYSeriesCollection(final Signal signal,
-                                                                    final String seriesName)
+    public static XYSeriesCollection createSignalXYSeriesCollection(final Signal signal, final String seriesName)
     {
         // Get the signal time and amplitudes
         final float[] times = signal.getSampledTimings();
@@ -28,8 +29,7 @@ public class JFreeChartUtils
         return new XYSeriesCollection(series);
     }
 
-    public static XYSeriesCollection createCorrelationXYSeriesCollection(final SignalCorrelation signalCorrelation,
-                                                                         final String seriesName)
+    public static XYSeriesCollection createCorrelationXYSeriesCollection(final SignalCorrelation signalCorrelation, final String seriesName)
     {
         final float[] correlationCoefficients = signalCorrelation.getCoefficients();
 
@@ -55,13 +55,36 @@ public class JFreeChartUtils
         return magnitudeHistogram;
     }
 
-    public static XYSeriesCollection createPhaseSpectrumXYSeriesCollection(final PhaseSpectrum phaseSpectrum,
-                                                                           final String seriesName,
-                                                                           final int tolerance)
+    public static XYSeriesCollection createPhaseSpectrumXYSeriesCollection(final PhaseSpectrum phaseSpectrum, final String seriesName)
     {
         // Based on the tolerance, accept or zero the phase
         final XYSeries series = new XYSeries(seriesName);
         return new XYSeriesCollection(series);
     }
 
+    public static ChartPanel createXYLineChartPanel(final XYSeriesCollection xySeriesCollection, final String title,
+                                                    final String xAxisName, final String yAxisName)
+    {
+        return new ChartPanel(ChartFactory.createXYLineChart(
+                title,
+                xAxisName,
+                yAxisName,
+                xySeriesCollection,
+                PlotOrientation.VERTICAL,
+                true, true, false
+        ));
+    }
+
+    public static ChartPanel createHistogramPanel(final HistogramDataset histogramDataset, final String title,
+                                                  final String xAxisName, final String yAxisName)
+    {
+        return new ChartPanel(ChartFactory.createHistogram(
+                title,
+                xAxisName,
+                yAxisName,
+                histogramDataset,
+                PlotOrientation.VERTICAL,
+                true, true, false
+        ));
+    }
 }

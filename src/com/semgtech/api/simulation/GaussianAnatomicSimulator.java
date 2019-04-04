@@ -8,11 +8,10 @@ import com.semgtech.api.utils.signals.Signal;
 
 import javax.sound.sampled.AudioFormat;
 
-public class GaussianAnatomicSimulator
-    extends AnatomicSimulator<GaussianActionPotential>
+public class GaussianAnatomicSimulator extends AnatomicSimulator<GaussianActionPotential>
 {
 
-    private static final String DEFAULT_NAME = "Basic Gaussian Anatomic Simulator";
+    public static final String DEFAULT_NAME = "Basic Gaussian Anatomic Simulator";
 
     public GaussianAnatomicSimulator(final String name, final Muscle<GaussianActionPotential> muscle,
                                      final AudioFormat format)

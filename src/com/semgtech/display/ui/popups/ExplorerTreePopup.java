@@ -190,7 +190,7 @@ public class ExplorerTreePopup extends JPopupMenu
         return explorerTreeController;
     }
 
-    private JMenuItem getNewSimulationItem()
+    public JMenuItem getNewSimulationItem()
     {
         return newSimulationItem;
     }
