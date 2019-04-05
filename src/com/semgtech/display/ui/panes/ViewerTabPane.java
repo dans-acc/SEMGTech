@@ -1,5 +1,6 @@
 package com.semgtech.display.ui.panes;
 
+import com.semgtech.api.simulation.AnatomicSimulator;
 import com.semgtech.api.utils.signals.Signal;
 import com.semgtech.api.utils.signals.correlations.AutoCorrelation;
 import com.semgtech.api.utils.signals.correlations.CrossCorrelation;
@@ -7,6 +8,7 @@ import com.semgtech.api.utils.signals.correlations.SignalCorrelation;
 import com.semgtech.api.utils.signals.spectrum.MagnitudeSpectrum;
 import com.semgtech.api.utils.signals.spectrum.PhaseSpectrum;
 import com.semgtech.display.controllers.ViewerTabPaneController;
+import com.semgtech.display.ui.panels.SimulatorPanel;
 import com.semgtech.display.ui.panels.TabPanel;
 import com.semgtech.display.ui.panels.ViewerSidePanel;
 import com.semgtech.display.utils.JFreeChartUtils;
@@ -125,36 +127,39 @@ public class ViewerTabPane extends JTabbedPane
             return null;
 
         // Create the appropriate panel based on the provided object
-        if (object instanceof Signal)
+        if (object instanceof AnatomicSimulator) {
+            return new SimulatorPanel((AnatomicSimulator) object);
+        } else if (object instanceof Signal) {
             return JFreeChartUtils.createXYLineChartPanel(
                     JFreeChartUtils.createSignalXYSeriesCollection((Signal) object, SIGNAL_SERIES_NAME),
                     object.toString(),
                     SIGNAL_CHART_X_AXIS_NAME,
                     SIGNAL_CHART_Y_AXIS_NAME
             );
-        else if (object instanceof MagnitudeSpectrum)
+        } else if (object instanceof MagnitudeSpectrum) {
             return JFreeChartUtils.createHistogramPanel(
                     JFreeChartUtils.createMagnitudeSpectrumHistogramDataset((MagnitudeSpectrum) object, MAGNITUDE_SERIES_NAME),
                     object.toString(),
                     MAGNITUDE_CHART_X_AXIS_NAME,
                     MAGNITUDE_CHART_Y_AXIS_NAME
             );
-        else if (object instanceof PhaseSpectrum)
+        } else if (object instanceof PhaseSpectrum) {
             return null;
-        else if (object instanceof AutoCorrelation)
+        } else if (object instanceof AutoCorrelation) {
             return JFreeChartUtils.createXYLineChartPanel(
                     JFreeChartUtils.createCorrelationXYSeriesCollection((SignalCorrelation) object, AUTO_CORRELATION_SERIES_NAME),
                     object.toString(),
                     CORRELATION_CHART_X_AXIS_NAME,
                     CORRELATION_CHART_Y_AXIS_NAME
             );
-        else if (object instanceof CrossCorrelation)
+        } else if (object instanceof CrossCorrelation) {
             return JFreeChartUtils.createXYLineChartPanel(
                     JFreeChartUtils.createCorrelationXYSeriesCollection((SignalCorrelation) object, CROSS_CORRELATION_SERIES_NAME),
                     object.toString(),
                     CORRELATION_CHART_X_AXIS_NAME,
                     CORRELATION_CHART_Y_AXIS_NAME
             );
+        }
         return null;
     }
 

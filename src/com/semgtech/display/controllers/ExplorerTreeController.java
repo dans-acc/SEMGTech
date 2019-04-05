@@ -15,6 +15,7 @@ import com.semgtech.display.ui.popups.ExplorerTreePopup;
 import com.semgtech.display.ui.trees.ExplorerTree;
 import com.semgtech.display.windows.MainWindow;
 
+import javax.sound.sampled.AudioFormat;
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
@@ -193,10 +194,12 @@ public class ExplorerTreeController implements MouseListener, ActionListener
                 return;
         } while (simulationName.getText() == null || simulationName.getText().isEmpty());
 
+        AudioFormat format = new AudioFormat(1000, 16, 1, false, true);
+
         // Depending on the selected input, create the appropriate simulation type
         AnatomicSimulator simulator = simulationTypes.getSelectedIndex() == 0
-                ? new GaussianAnatomicSimulator(simulationName.getText(), null, null)
-                : new KaghazchiAnatomicSimulator(simulationName.getText(), null, null);
+                ? new GaussianAnatomicSimulator(simulationName.getText(), null, format)
+                : new KaghazchiAnatomicSimulator(simulationName.getText(), null, format);
 
         // Add the simulator to the tree and display it
         explorerTree.addChildObject(

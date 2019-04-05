@@ -30,10 +30,6 @@ public class ViewerTabPaneController implements ActionListener, ChangeListener
         final TabCloseButton tabCloseButton = (TabCloseButton) actionEvent.getSource();
         for (int tab = 0; tab < viewerTabPane.getTabCount(); ++tab) {
             if (((TabPanel) viewerTabPane.getTabComponentAt(tab)).getCloseButton() == tabCloseButton) {
-                /*
-                viewerTabPane.removeTabAt(tab);
-                viewerTabPane.repaint();
-                */
                 viewerTabPane.closeObjectTabPanel(tab);
                 break;
             }

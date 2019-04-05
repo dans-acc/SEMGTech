@@ -2,7 +2,6 @@ package com.semgtech.display.ui.trees;
 
 import com.semgtech.api.utils.signals.LoggedSignal;
 import com.semgtech.display.models.EventTreeModel;
-import com.semgtech.display.ui.panels.EventPanel;
 
 import javax.swing.*;
 import javax.swing.tree.TreeSelectionModel;
