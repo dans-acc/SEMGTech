@@ -100,7 +100,7 @@ public class ExplorerTreeController implements MouseListener, ActionListener
         final Object[] selectedObjects = getSelectedObjects(explorerTree.getSelectionPaths());
 
         // Disable / enable options based on what is selected
-        explorerTree.getExplorerTreePopup().enableAppropriateItems(selectedObjects);
+        explorerTree.getExplorerTreePopup().enableMenuItemsFor(selectedObjects);
         explorerTree.getExplorerTreePopup().show(
                 explorerTree,
                 mouseEvent.getX(),
@@ -152,9 +152,9 @@ public class ExplorerTreeController implements MouseListener, ActionListener
             computeSignalMagnitudeSpectrum(selectedPaths, selectedObjects);
         else if (source == explorerTreePopup.getFourierPhaseSpectrumItem())
             computeSignalPhaseSpectrum(selectedPaths, selectedObjects);
-        else if (source == explorerTreePopup.getSignalAutoCorrelationItem())
+        else if (source == explorerTreePopup.getCorrelationAutoCorrelationItem())
             computeSignalAutoCorrelation(selectedPaths, selectedObjects);
-        else if (source == explorerTreePopup.getSignalCrossCorrelationItem())
+        else if (source == explorerTreePopup.getCorrelationCrossCorrelationItem())
             computeSignalCrossCorrelation(selectedPaths, selectedObjects);
         else if (source == explorerTreePopup.getNormaliseItem())
             normaliseSignal(selectedPaths, selectedObjects);

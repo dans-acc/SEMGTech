@@ -1,5 +1,6 @@
 package com.semgtech.display.controllers;
 
+import com.semgtech.display.ui.trees.EventTree;
 import com.semgtech.display.windows.MainWindow;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -12,10 +13,24 @@ import java.awt.event.MouseListener;
 public class EventTreeController implements MouseListener, ActionListener
 {
 
+    private EventTree eventTree;
+
+    public EventTreeController(final EventTree eventTree)
+    {
+        this.eventTree = eventTree;
+    }
+
     @Override
     public void mouseClicked(final MouseEvent mouseEvent) { }
     @Override
-    public void mousePressed(final MouseEvent mouseEvent) { }
+    public void mousePressed(final MouseEvent mouseEvent)
+    {
+        eventTree.getEventTreePopup().show(
+                eventTree,
+                mouseEvent.getX(),
+                mouseEvent.getY()
+        );
+    }
     @Override
     public void mouseReleased(final MouseEvent mouseEvent) { }
     @Override

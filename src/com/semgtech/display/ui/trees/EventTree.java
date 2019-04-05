@@ -1,7 +1,9 @@
 package com.semgtech.display.ui.trees;
 
 import com.semgtech.api.utils.signals.LoggedSignal;
+import com.semgtech.display.controllers.EventTreeController;
 import com.semgtech.display.models.EventTreeModel;
+import com.semgtech.display.ui.popups.EventTreePopup;
 
 import javax.swing.*;
 import javax.swing.tree.TreeSelectionModel;
@@ -13,6 +15,10 @@ public class EventTree extends JTree
 
     private LoggedSignal loggedSignal;
     private EventTreeModel eventTreeModel;
+
+    // Event tree controller and popup menu
+    private EventTreeController eventTreeController;
+    private EventTreePopup eventTreePopup;
 
     public EventTree(final LoggedSignal loggedSignal)
     {
@@ -26,6 +32,14 @@ public class EventTree extends JTree
         setToolTipText(EVENT_TREE_TOOLTIP);
         setRootVisible(false);
         getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+
+        // Create the event tree controller and add it
+        eventTreeController = new EventTreeController(this);
+        addMouseListener(eventTreeController);
+
+        // Create the popup menu and add it
+        eventTreePopup = new EventTreePopup(eventTreeController);
+        add(eventTreePopup);
     }
 
     public LoggedSignal getLoggedSignal()
@@ -37,4 +51,11 @@ public class EventTree extends JTree
     {
         return eventTreeModel;
     }
+
+    public EventTreePopup getEventTreePopup()
+    {
+        return eventTreePopup;
+    }
+
+
 }

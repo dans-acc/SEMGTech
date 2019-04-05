@@ -1,14 +1,13 @@
 package com.semgtech.display.ui.popups;
 
 import com.semgtech.api.simulation.AnatomicSimulator;
-import com.semgtech.api.utils.signals.LoggedSignal;
 import com.semgtech.api.utils.signals.Signal;
 import com.semgtech.display.controllers.ExplorerTreeController;
 
 import javax.swing.*;
 
 
-public class ExplorerTreePopup extends JPopupMenu
+public class ExplorerTreePopup extends PopupMenu<ExplorerTreeController>
 {
 
     // New menu names
@@ -67,9 +66,6 @@ public class ExplorerTreePopup extends JPopupMenu
     private JMenuItem importItem;
     private JMenuItem exportItem;
 
-    // The option for displaying information
-    private JMenuItem informationItem;
-
     // Refactoring options
     private JMenu refactorMenu;
     private JMenuItem refactorRenameItem;
@@ -88,107 +84,66 @@ public class ExplorerTreePopup extends JPopupMenu
     private JMenuItem fourierPhaseSpectrumItem;
 
     // Signal correlation options
-    private JMenu signalCorrelationMenu;
-    private JMenuItem signalAutoCorrelationItem;
-    private JMenuItem signalCrossCorrelationItem;
+    private JMenu correlationMenu;
+    private JMenuItem correlationAutoCorrelationItem;
+    private JMenuItem correlationCrossCorrelationItem;
 
     // Normalisation option
     private JMenuItem normaliseItem;
 
     public ExplorerTreePopup(final ExplorerTreeController explorerTreeController)
     {
-        this.explorerTreeController = explorerTreeController;
-        initExplorerPopup();
-    }
-
-    private void initExplorerPopup()
-    {
-        // Set the mouse listener
-        super.addMouseListener(explorerTreeController);
-
-        // Create the popup menus items
-        initExplorerMenuItems();
+        super(explorerTreeController);
     }
 
     @SuppressWarnings("Duplicates")
-    private void initExplorerMenuItems()
+    @Override
+    public void initMenuItems()
     {
-        // Create the new menu options
+        // Create the new simulation menu
         newSimulationItem = createMenuItem(NEW_SIMULATION_ITEM_NAME, NEW_SIMULATION_ITEM_TOOLTIP);
-
-        // Create the new menu
-        newMenu = new JMenu(NEW_MENU_NAME);
-        newMenu.add(newSimulationItem);
+        newMenu = createMenu(NEW_MENU_NAME, newSimulationItem);
         add(newMenu);
 
-        // Create import and export options
+        // Create the import and export options
         importItem = createMenuItem(IMPORT_ITEM_NAME, IMPORT_ITEM_TOOLTIP);
-        add(importItem);
         exportItem = createMenuItem(EXPORT_ITEM_NAME, EXPORT_ITEM_TOOLTIP);
+        add(importItem);
         add(exportItem);
         add(new JSeparator(JSeparator.HORIZONTAL));
 
-        // Create the refactoring options
+        // Create the refactor menu and the delete option
         refactorRenameItem = createMenuItem(REFACTOR_RENAME_ITEM_NAME, REFACTOR_RENAME_ITEM_TOOLTIP);
-
-        // Create the refactoring menu
-        refactorMenu = new JMenu(REFACTOR_MENU_NAME);
-        refactorMenu.add(refactorRenameItem);
-        add(refactorMenu);
-
-        // Create the deletion option
+        refactorMenu = createMenu(REFACTOR_MENU_NAME, refactorRenameItem);
         deleteItem = createMenuItem(DELETE_ITEM_NAME, DELETE_ITEM_TOOLTIP);
+        add(refactorMenu);
         add(deleteItem);
         add(new JSeparator(JSeparator.HORIZONTAL));
 
-        // Create the simulate options
+        // Create the simulation menu
         simulateSEMGItem = createMenuItem(SIMULATE_SEMG_ITEM_NAME, SIMULATE_SEMG_ITEM_TOOLTIP);
         simulateMUAPTItem = createMenuItem(SIMULATE_MUAPT_ITEM_NAME, SIMULATE_MUAPT_ITEM_TOOLTIP);
-
-        // Create the simulate menu
-        simulateMenu = new JMenu(SIMULATE_MENU_NAME);
-        simulateMenu.add(simulateSEMGItem);
-        simulateMenu.add(simulateMUAPTItem);
+        simulateMenu = createMenu(SIMULATE_MENU_NAME, simulateSEMGItem, simulateMUAPTItem);
         add(simulateMenu);
         add(new JSeparator(JSeparator.HORIZONTAL));
 
-        // Create the fourier options
+        // Create the fourier menu
         fourierMagnitudeSpectrumItem = createMenuItem(FOURIER_MAGNITUDE_SPECTRUM_ITEM_NAME, FOURIER_MAGNITUDE_SPECTRUM_ITEM_TOOLTIP);
         fourierPhaseSpectrumItem = createMenuItem(FOURIER_PHASE_SPECTRUM_ITEM_NAME, FOURIER_PHASE_SPECTRUM_ITEM_TOOLTIP);
-
-        // Create the fourier menu
-        fourierMenu = new JMenu(FOURIER_MENU_NAME);
-        fourierMenu.add(fourierMagnitudeSpectrumItem);
-        fourierMenu.add(fourierPhaseSpectrumItem);
-        add(fourierMenu);
-
-        // Create signal correlation options
-        signalAutoCorrelationItem = createMenuItem(SIGNAL_AUTO_CORRELATION_ITEM_NAME, SIGNAL_AUTO_CORRELATION_ITEM_TOOLTIP);
-        signalCrossCorrelationItem = createMenuItem(SIGNAL_CROSS_CORRELATION_ITEM_NAME, SIGNAL_CROSS_CORRELATION_ITEM_TOOLTIP);
+        fourierMenu = createMenu(FOURIER_MENU_NAME, fourierMagnitudeSpectrumItem, fourierPhaseSpectrumItem);
 
         // Create the correlation menu
-        signalCorrelationMenu = new JMenu(SIGNAL_CORRELATION_MENU_NAME);
-        signalCorrelationMenu.add(signalAutoCorrelationItem);
-        signalCorrelationMenu.add(signalCrossCorrelationItem);
-        add(signalCorrelationMenu);
+        correlationAutoCorrelationItem = createMenuItem(SIGNAL_AUTO_CORRELATION_ITEM_NAME, SIGNAL_AUTO_CORRELATION_ITEM_TOOLTIP);
+        correlationCrossCorrelationItem = createMenuItem(SIGNAL_CROSS_CORRELATION_ITEM_NAME, SIGNAL_CROSS_CORRELATION_ITEM_TOOLTIP);
+        correlationMenu = createMenu(SIGNAL_CORRELATION_MENU_NAME, correlationAutoCorrelationItem, correlationCrossCorrelationItem);
 
-        // Create the normalise and de-noise menu options
+        // Create the normalisation option
         normaliseItem = createMenuItem(NORMALISE_ITEM_NAME, NORMALISE_ITEM_TOOLTIP);
+        add(fourierMenu);
+        add(correlationMenu);
         add(normaliseItem);
     }
 
-    private JMenuItem createMenuItem(final String name, final String tooltip)
-    {
-        final JMenuItem menuItem = new JMenuItem(name);
-        menuItem.addActionListener(explorerTreeController);
-        menuItem.setToolTipText(tooltip);
-        return menuItem;
-    }
-
-    public ExplorerTreeController getExplorerTreeController()
-    {
-        return explorerTreeController;
-    }
 
     public JMenuItem getNewSimulationItem()
     {
@@ -235,14 +190,14 @@ public class ExplorerTreePopup extends JPopupMenu
         return fourierPhaseSpectrumItem;
     }
 
-    public JMenuItem getSignalAutoCorrelationItem()
+    public JMenuItem getCorrelationAutoCorrelationItem()
     {
-        return signalAutoCorrelationItem;
+        return correlationAutoCorrelationItem;
     }
 
-    public JMenuItem getSignalCrossCorrelationItem()
+    public JMenuItem getCorrelationCrossCorrelationItem()
     {
-        return signalCrossCorrelationItem;
+        return correlationCrossCorrelationItem;
     }
 
     public JMenuItem getNormaliseItem()
@@ -250,7 +205,8 @@ public class ExplorerTreePopup extends JPopupMenu
         return normaliseItem;
     }
 
-    public void enableAppropriateItems(final Object[] objects)
+    @Override
+    public void enableMenuItemsFor(final Object[] objects)
     {
         // Check that objects are all signals
         final boolean objectsAreSignals = areOfSameInstance(Signal.class, objects);
@@ -275,9 +231,9 @@ public class ExplorerTreePopup extends JPopupMenu
         final boolean enableAutoCorrelationItem = objects != null && objects.length == 1,
                 enableCrossCorrelationItem = objects != null && objects.length == 2,
                 enableCorrelationMenu = objectsAreSignals && (enableAutoCorrelationItem || enableCrossCorrelationItem);
-        signalCorrelationMenu.setEnabled(enableCorrelationMenu);
-        signalAutoCorrelationItem.setEnabled(enableAutoCorrelationItem);
-        signalCrossCorrelationItem.setEnabled(enableCrossCorrelationItem);
+        correlationMenu.setEnabled(enableCorrelationMenu);
+        correlationAutoCorrelationItem.setEnabled(enableAutoCorrelationItem);
+        correlationCrossCorrelationItem.setEnabled(enableCrossCorrelationItem);
 
         // Enable / disable the normalise item
         final boolean enableNormaliseItem = objects != null && objects.length > 0 && objectsAreSignals;
@@ -286,16 +242,5 @@ public class ExplorerTreePopup extends JPopupMenu
         // Call repaint to update components
         revalidate();
         repaint();
-    }
-
-    private boolean areOfSameInstance(final Class clazz, final Object[] objects)
-    {
-        if (objects == null)
-            return false;
-        for (Object object : objects) {
-            if (!clazz.isInstance(object))
-                return false;
-        }
-        return true;
     }
 }
