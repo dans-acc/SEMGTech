@@ -6,9 +6,11 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class EditablePanelController implements ActionListener
+public class EditablePanelController
+        implements ActionListener
 {
 
+    // The panel for which the controller exists i.e. manages the panels I/O
     private EditablePanel editablePanel;
 
     public EditablePanelController(final EditablePanel editablePanel)
@@ -16,11 +18,20 @@ public class EditablePanelController implements ActionListener
         this.editablePanel = editablePanel;
     }
 
+    /**
+     * @return the editable panel
+     */
     public EditablePanel getEditablePanel()
     {
         return editablePanel;
     }
 
+    /**
+     * Method handles the changing of state; clicking any of the control buttons
+     * either makes the panel editable or not.
+     *
+     * @param actionEvent - I/0 from the JVM in the form of a button click.
+     */
     @Override
     public void actionPerformed(final ActionEvent actionEvent)
     {

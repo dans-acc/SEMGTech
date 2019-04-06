@@ -1,10 +1,13 @@
 package com.semgtech.display.ui.popups;
 
+import com.semgtech.api.simulation.anatomy.MotorUnit;
+import com.semgtech.api.simulation.anatomy.Muscle;
 import com.semgtech.display.controllers.AnatomicTreeController;
+import com.semgtech.display.controllers.TreeController;
 
 import javax.swing.*;
 
-public class AnatomicTreePopup extends PopupMenu<AnatomicTreeController>
+public class AnatomicTreePopup extends PopupMenu
 {
 
     // Names and tooltip for the 'new' menu items
@@ -34,9 +37,6 @@ public class AnatomicTreePopup extends PopupMenu<AnatomicTreeController>
     private static final String DELETE_ITEM_NAME = "Delete";
     private static final String DELETE_ITEM_TOOLTIP = "Click to delete the currently selected anatomic components";
 
-    // Controller used for handling the popup menu presses
-    private AnatomicTreeController anatomicTreeController;
-
     // New menu for creating single components
     private JMenu newMenu;
     private JMenuItem newMuscleItem;
@@ -56,9 +56,9 @@ public class AnatomicTreePopup extends PopupMenu<AnatomicTreeController>
     // Deletion item
     private JMenuItem deleteItem;
 
-    public AnatomicTreePopup(final AnatomicTreeController anatomicTreeController)
+    public AnatomicTreePopup(final TreeController controller)
     {
-        super(anatomicTreeController);
+        super(controller);
     }
 
     @SuppressWarnings("Duplicates")
@@ -144,10 +144,47 @@ public class AnatomicTreePopup extends PopupMenu<AnatomicTreeController>
         return deleteItem;
     }
 
+    /**
+     *
+     * Disables / enables options (MenuItems) within the popup menu based
+     * on the currently selected nodes and therefore objects in the tree (JTree).
+     *
+     * @param objects - the 'list' of selected objects in the tree.
+     */
     @Override
-    public void enableMenuItemsFor(final Object[] selectedObjects)
+    public void enableMenuItemsFor(final Object[] objects)
     {
+        // Enable / disable the new single component options
+        final boolean enableNewMuscleItem = objects == null || objects.length == 0,
+                enableNewMotorUnitItem = objects != null && objects.length == 1 && areOfSameInstance(Muscle.class, objects),
+                enableNewFibreItem = objects != null && objects.length == 1 && areOfSameInstance(MotorUnit.class, objects),
+                enableNewMenu = enableNewMuscleItem || enableNewMotorUnitItem || enableNewFibreItem;
+        newMenu.setEnabled(enableNewMenu);
+        if (enableNewMenu) {
+            newMuscleItem.setEnabled(enableNewMuscleItem);
+            newMotorUnitItem.setEnabled(enableNewMotorUnitItem);
+            newFibreItem.setEnabled(enableNewFibreItem);
+        }
 
+        // Enable / disable generation menu items
+        final boolean enableGenerateMuscleItem = objects == null || objects.length == 0,
+                enableGenerateMotorUnitsItem = objects != null && objects.length == 1 && areOfSameInstance(Muscle.class, objects),
+                enableGenerateFibreItem = objects != null && objects.length > 0 && areOfSameInstance(MotorUnit.class, objects),
+                enableGenerateMenu = enableGenerateMuscleItem || enableGenerateMotorUnitsItem || enableGenerateFibreItem;
+        generateMenu.setEnabled(enableGenerateMenu);
+        if (enableGenerateMenu) {
+            generateMuscleItem.setEnabled(enableGenerateMuscleItem);
+            generateMotorUnitItem.setEnabled(enableGenerateMotorUnitsItem);
+            generateFibreItem.setEnabled(enableGenerateFibreItem);
+        }
+
+        // Enable / disable the entire menu because there is only one selectable item
+        final boolean enableRefactorMenu = objects != null && objects.length == 1;
+        refactorMenu.setEnabled(enableRefactorMenu);
+
+        // Enable / disable the deletion item
+        final boolean enableDeleteItem = objects != null && objects.length > 0;
+        deleteItem.setEnabled(enableDeleteItem);
     }
 
 }

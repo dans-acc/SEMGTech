@@ -77,51 +77,27 @@ public class SimulatorPanel extends EditablePanel
     {
         // Create an editable component for the name
         nameTextField = new JTextField();
-        addEditableComponent(
-                NAME_TEXT_FIELD_NAME,
-                NAME_TEXT_FIELD_TOOLTIP,
-                nameTextField
-        );
+        addEditableComponent(NAME_TEXT_FIELD_NAME, NAME_TEXT_FIELD_TOOLTIP, nameTextField);
 
         // Create a label for displaying the type of simulator being used
         typeNameLabel = new JLabel();
-        addEditableComponent(
-                TYPE_NAME_FIELD_NAME,
-                TYPE_NAME_FILED_TOOLTIP,
-                typeNameLabel
-        );
+        addEditableComponent(TYPE_NAME_FIELD_NAME, TYPE_NAME_FILED_TOOLTIP, typeNameLabel);
 
         // Create the encoding combobox
         encodingComboBox = new JComboBox<AudioFormat.Encoding>(ENCODING_FIELD_VALUES);
-        addEditableComponent(
-                ENCODING_FIELD_NAME,
-                ENCODING_FIELD_TOOLTIP,
-                encodingComboBox
-        );
+        addEditableComponent(ENCODING_FIELD_NAME, ENCODING_FIELD_TOOLTIP, encodingComboBox);
 
         // Create the endianness combobox
         endiannessComboBox = new JComboBox<String>(ENDIANNESS_FIELD_VALUES);
-        addEditableComponent(
-                ENDIANNESS_FIELD_NAME,
-                ENDIANNESS_FIELD_TOOLTIP,
-                endiannessComboBox
-        );
+        addEditableComponent(ENDIANNESS_FIELD_NAME, ENDIANNESS_FIELD_TOOLTIP, endiannessComboBox);
 
         // Create an editable component for the sampling rate
         samplingRateTextField = new JTextField();
-        addEditableComponent(
-                SAMPLING_RATE_FIELD_NAME,
-                SAMPLING_RATE_FIELD_TOOLTIP,
-                samplingRateTextField
-        );
+        addEditableComponent(SAMPLING_RATE_FIELD_NAME, SAMPLING_RATE_FIELD_TOOLTIP, samplingRateTextField);
 
         // Create the editable component for the sampling size in bits
         samplingSizeInBitsTextField = new JTextField();
-        addEditableComponent(
-                SAMPLING_SIZE_IN_BITS_FIELD_NAME,
-                SAMPLING_SIZE_IN_BITS_FIELD_TOOLTIP,
-                samplingSizeInBitsTextField
-        );
+        addEditableComponent(SAMPLING_SIZE_IN_BITS_FIELD_NAME, SAMPLING_SIZE_IN_BITS_FIELD_TOOLTIP, samplingSizeInBitsTextField);
     }
 
     @Override

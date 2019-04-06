@@ -19,45 +19,38 @@ import javax.sound.sampled.AudioFormat;
 import javax.swing.*;
 import javax.swing.tree.*;
 
-public class ExplorerTree extends JTree
+public class ExplorerTree extends Tree<DefaultTreeModel, ExplorerTreePopup>
 {
 
+    // The explorer trees tooltip popup message
     private static final String EXPLORER_TREE_TOOLTIP = "Right-Click for more options.";
 
-    private ExplorerPanel explorerPanel;
-
-    // The tree model
-    private DefaultMutableTreeNode defaultTreeNodeRoot;
-
-    // The trees popup menu
-    private ExplorerTreeController explorerTreeController;
-    private ExplorerTreePopup explorerTreePopup;
-
-    public ExplorerTree(final ExplorerPanel explorerPanel)
+    public ExplorerTree()
     {
-        this.explorerPanel = explorerPanel;
-        initExplorerTree();
+        initTree();
     }
 
-    private void initExplorerTree()
+    @Override
+    protected void initTree()
     {
-        // Create the default tree model
-        defaultTreeNodeRoot = new DefaultMutableTreeNode();
-        setModel(new DefaultTreeModel(defaultTreeNodeRoot));
-
         // Init various tree related properties
         setToolTipText(EXPLORER_TREE_TOOLTIP);
         setRootVisible(false);
         getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
 
-        // Create the explorer controller and set it
-        explorerTreeController = new ExplorerTreeController(this);
-        addMouseListener(explorerTreeController);
+        // Create and set the trees model
+        model = new DefaultTreeModel(new DefaultMutableTreeNode());
+        setModel(model);
 
-        // Create an instance of the explorer popup menu, and add it
-        explorerTreePopup = new ExplorerTreePopup(explorerTreeController);
-        add(explorerTreePopup);
+        // Create and set the trees controller
+        controller = new ExplorerTreeController(this);
+        addMouseListener(controller);
 
+        // Create and set the popup menu
+        popup = new ExplorerTreePopup(controller);
+        add(popup);
+
+        // These are temp
         createSignals();
         createSignals();
     }
@@ -83,49 +76,30 @@ public class ExplorerTree extends JTree
 
         LoggedSignal signal = simulator.simulateMuscleSEMG(100, electrode);
 
-        addChildObject(defaultTreeNodeRoot, signal, true);
-    }
-
-    public ExplorerPanel getExplorerPanel()
-    {
-        return explorerPanel;
-    }
-
-    public ExplorerTreeController getExplorerTreeController()
-    {
-        return explorerTreeController;
-    }
-
-    public ExplorerTreePopup getExplorerTreePopup()
-    {
-        return explorerTreePopup;
+        addChild(getModel().getRoot(), signal, true);
     }
 
     @Override
-    public DefaultTreeModel getModel()
+    public void addChild(final Object parent, final Object child,
+                         final boolean children)
     {
-        return (DefaultTreeModel) super.getModel();
-    }
-
-    public void addChildObject(final TreePath path, final Object object,
-                               final boolean allowChildren, final boolean expandNode)
-    {
-        addChildObject(path.getLastPathComponent(), object, allowChildren);
-        if (expandNode)
-            expandPath(path);
-    }
-
-    public void addChildObject(final Object parent, final Object object,
-                               final boolean allowChildren)
-    {
-        // Check that we're dealing with a valid node
         if (!(parent instanceof DefaultMutableTreeNode))
             return;
-        DefaultMutableTreeNode parentNode = (DefaultMutableTreeNode) parent;
 
-        // Create a child node and add it
-        final DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(object, allowChildren);
-        parentNode.add(childNode);
-        getModel().reload(parentNode);
+        final DefaultMutableTreeNode component = new DefaultMutableTreeNode(child, children);
+
+        // Add the new child object to the composite
+        final DefaultMutableTreeNode composite = (DefaultMutableTreeNode) parent;
+        composite.add(component);
+        getModel().reload(composite);
+    }
+
+    @Override
+    public void removeChild(final TreePath path)
+    {
+        if (path == null || !(path.getLastPathComponent() instanceof DefaultMutableTreeNode))
+            return;
+        final DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getLastPathComponent();
+        getModel().removeNodeFromParent(node);
     }
 }

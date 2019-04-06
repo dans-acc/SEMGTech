@@ -3,11 +3,12 @@ package com.semgtech.display.ui.popups;
 import com.semgtech.api.simulation.AnatomicSimulator;
 import com.semgtech.api.utils.signals.Signal;
 import com.semgtech.display.controllers.ExplorerTreeController;
+import com.semgtech.display.controllers.TreeController;
 
 import javax.swing.*;
 
 
-public class ExplorerTreePopup extends PopupMenu<ExplorerTreeController>
+public class ExplorerTreePopup extends PopupMenu
 {
 
     // New menu names
@@ -91,9 +92,9 @@ public class ExplorerTreePopup extends PopupMenu<ExplorerTreeController>
     // Normalisation option
     private JMenuItem normaliseItem;
 
-    public ExplorerTreePopup(final ExplorerTreeController explorerTreeController)
+    public ExplorerTreePopup(final TreeController controller)
     {
-        super(explorerTreeController);
+        super(controller);
     }
 
     @SuppressWarnings("Duplicates")
@@ -105,9 +106,11 @@ public class ExplorerTreePopup extends PopupMenu<ExplorerTreeController>
         newMenu = createMenu(NEW_MENU_NAME, newSimulationItem);
         add(newMenu);
 
-        // Create the import and export options
+        // Create the import and export options; disabled due to functionality not being implemented
         importItem = createMenuItem(IMPORT_ITEM_NAME, IMPORT_ITEM_TOOLTIP);
         exportItem = createMenuItem(EXPORT_ITEM_NAME, EXPORT_ITEM_TOOLTIP);
+        importItem.setEnabled(false);
+        exportItem.setEnabled(false);
         add(importItem);
         add(exportItem);
         add(new JSeparator(JSeparator.HORIZONTAL));
@@ -205,6 +208,15 @@ public class ExplorerTreePopup extends PopupMenu<ExplorerTreeController>
         return normaliseItem;
     }
 
+    /**
+     * Disables / enables options (MenuItems) within the popup menu based
+     * on the currently selected nodes and therefore objects in the tree (JTree).
+     *
+     * Please note that imports and exports are not yet implemented. We
+     * need to implement an appropriate format beforehand.
+     *
+     * @param objects - the 'list' of selected objects in the tree.
+     */
     @Override
     public void enableMenuItemsFor(final Object[] objects)
     {

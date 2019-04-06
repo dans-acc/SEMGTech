@@ -1,42 +1,98 @@
 package com.semgtech.display.ui.panels;
 
-import com.semgtech.api.simulation.AnatomicSimulator;
-import com.semgtech.display.ui.trees.AnatomicTree;
+import com.semgtech.api.simulation.anatomy.AnatomicComponent;
+import com.semgtech.api.utils.signals.events.EventComponent;
+import com.semgtech.api.utils.vector.Vector3d;
 
 import javax.swing.*;
-import javax.swing.border.TitledBorder;
-import java.awt.*;
 
-public class AnatomicPanel extends SideView<AnatomicSimulator>
+public class AnatomicPanel<T extends AnatomicComponent> extends EditablePanel
 {
 
-    private static final String ANATOMIC_PANEL_NAME = "Anatomic Structure";
+    // The name and tooltip for the name of the anatomic component
+    private static final String NAME_FIELD_NAME = "Name:";
+    private static final String NAME_FIELD_TOOLTIP = "The name of the anatomic component";
 
-    private AnatomicTree anatomicTree;
+    // The name and tooltip for the position component
+    private static final String POSITION_FIELD_NAME = "Position:";
+    private static final String POSITION_FIELD_TOOLTIP = "The position (x, y, z) of the anatomic component.";
+    private static final String POSITION_FIELD_FORMAT = "%f, %f, %f";
 
-    public AnatomicPanel(final AnatomicSimulator anatomicSimulator)
+    // The name and tooltip for the radius
+    private static final String RADIUS_NAME = "Radius:";
+    private static final String RADIUS_TOOLTIP = "The radius of the anatomic component";
+
+    // The anatomic component
+    private T anatomicComponent;
+
+    // The name, position and radius of the anatomic component
+    private JTextField nameTextField;
+    private JTextField positionTextField;
+    private JTextField radiusTextField;
+
+    public AnatomicPanel(final T anatomicComponent)
     {
-        super(anatomicSimulator);
-
-        // Create the anatomic tree
-        anatomicTree = new AnatomicTree(anatomicSimulator);
-        final JScrollPane anatomicTreeScrollPane = new JScrollPane(anatomicTree);
-        anatomicTreeScrollPane.setBorder(BorderFactory.createLoweredBevelBorder());
-
-        // Create the anatomic tree panel
-        setBorder(BorderFactory.createTitledBorder(
-                BorderFactory.createEmptyBorder(),
-                ANATOMIC_PANEL_NAME,
-                TitledBorder.LEFT,
-                TitledBorder.TOP
-        ));
-        setLayout(new BorderLayout());
-        add(anatomicTreeScrollPane, BorderLayout.CENTER);
+        this.anatomicComponent = anatomicComponent;
     }
 
-    public AnatomicTree getAnatomicTree()
+    public T getAnatomicComponent()
     {
-        return anatomicTree;
+        return anatomicComponent;
+    }
+
+    @Override
+    public void initContentPanel()
+    {
+        // Create the anatomic component name field
+        nameTextField = new JTextField();
+        addEditableComponent(NAME_FIELD_NAME, NAME_FIELD_TOOLTIP, nameTextField);
+
+        // Create the position fields
+        positionTextField = new JTextField();
+        addEditableComponent(POSITION_FIELD_NAME, POSITION_FIELD_TOOLTIP, positionTextField);
+
+        // Create the radius fields
+        radiusTextField = new JTextField();
+        addEditableComponent(RADIUS_NAME, RADIUS_TOOLTIP, radiusTextField);
+    }
+
+    @Override
+    public void makePanelEditable(final boolean editable)
+    {
+        nameTextField.setEnabled(editable);
+        positionTextField.setEnabled(editable);
+        radiusTextField.setEnabled(editable);
+    }
+
+    @Override
+    public boolean canApplyEdits()
+    {
+        return true;
+    }
+
+    @Override
+    public void applyEdits()
+    {
+
+    }
+
+    @Override
+    public void updateEditComponents()
+    {
+        nameTextField.setText(anatomicComponent.getName());
+
+        // Set the position of the anatomic component
+        final Vector3d position = anatomicComponent.getPosition();
+        positionTextField.setText(String.format(
+                POSITION_FIELD_FORMAT,
+                position.getX(),
+                position.getY(),
+                position.getZ()
+                )
+        );
+
+        // Set the radius of the anatomic component
+        radiusTextField.setText(Double.toString(anatomicComponent.getRadius()));
     }
 
 }

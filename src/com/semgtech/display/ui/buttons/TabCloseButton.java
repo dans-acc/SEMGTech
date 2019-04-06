@@ -8,22 +8,15 @@ import java.awt.*;
 public class TabCloseButton extends JButton
 {
 
+    // The tabs close button name and tooltip
     private static final String CLOSE_BUTTON_NAME = "x";
     private static final String CLOSE_BUTTON_TOOLTIP = "Click to close the tab";
 
     public TabCloseButton()
     {
         super(CLOSE_BUTTON_NAME);
-        initTabCloseButton();
-    }
-
-    private void initTabCloseButton()
-    {
-        // Create the controller and register the events
-        addMouseListener(new TabCloseButtonController(this));
-
-        // Set various button properties
         setToolTipText(CLOSE_BUTTON_TOOLTIP);
+        addMouseListener(new TabCloseButtonController(this));
         setMargin(new Insets(0, 0, 0, 0));
         setBorderPainted(false);
         setBorder(BorderFactory.createEmptyBorder());

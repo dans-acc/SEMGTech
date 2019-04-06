@@ -23,6 +23,13 @@ public class AnatomicTreeModel implements TreeModel
         return root;
     }
 
+    /**
+     * Method performs appropriate checks to determine whether the anatomic component is
+     * a leaf within the encompassing tree structure.
+     *
+     * @param anatomicComponentNode - the anatomic component being checked.
+     * @return - true or false based on whether or not the component is a lief in the tree structure.
+     */
     @Override
     public boolean isLeaf(final Object anatomicComponentNode)
     {
@@ -31,6 +38,14 @@ public class AnatomicTreeModel implements TreeModel
         return anatomicComponentNode instanceof AnatomicComponent;
     }
 
+    /**
+     * Makes appropriate checks. If
+     *
+     * @param parentAnatomicComponent
+     * @param index -
+     * @return - an instance of an anatomic component or composite. If no component is present at the
+     * index, null is returned.
+     */
     @Override
     public Object getChild(final Object parentAnatomicComponent,
                            final int index)

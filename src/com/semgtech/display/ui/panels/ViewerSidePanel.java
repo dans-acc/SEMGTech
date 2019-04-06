@@ -107,9 +107,9 @@ public class ViewerSidePanel extends JPanel
         if (object == null)
             return null;
         else if (object instanceof LoggedSignal)
-            return new EventPanel((LoggedSignal) object);
+            return new EventSidePanel((LoggedSignal) object);
         else if(object instanceof AnatomicSimulator)
-            return new AnatomicPanel((AnatomicSimulator) object);
+            return new AnatomicSidePanel((AnatomicSimulator) object);
 
         return null;
     }

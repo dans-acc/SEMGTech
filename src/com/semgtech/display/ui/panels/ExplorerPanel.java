@@ -18,7 +18,7 @@ public class ExplorerPanel extends JPanel
         super(new BorderLayout());
 
         // Create and add the explorer tree to the explorer panel
-        this.explorerTree = new ExplorerTree(this);
+        this.explorerTree = new ExplorerTree();
 
         // Wrap the tree in a scroll pane, and JPanel to suppress scroll pane behaviour
         final JScrollPane explorerScrollPane = new JScrollPane(explorerTree);

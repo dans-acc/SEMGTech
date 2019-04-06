@@ -8,6 +8,7 @@ import com.semgtech.api.utils.signals.correlations.SignalCorrelation;
 import com.semgtech.api.utils.signals.spectrum.MagnitudeSpectrum;
 import com.semgtech.api.utils.signals.spectrum.PhaseSpectrum;
 import com.semgtech.display.controllers.ViewerTabPaneController;
+import com.semgtech.display.ui.panels.EditablePanel;
 import com.semgtech.display.ui.panels.SimulatorPanel;
 import com.semgtech.display.ui.panels.TabPanel;
 import com.semgtech.display.ui.panels.ViewerSidePanel;
@@ -19,9 +20,15 @@ import javax.swing.*;
 public class ViewerTabPane extends JTabbedPane
 {
 
-    // Error names
+    // For when the panel for the corresponding object that is to be displayed cannot be found
     private static final String OBJECT_PANEL_NOT_FOUND_MESSAGE = "Failed to display: %s";
     private static final String OBJECT_PANEL_NOT_FOUND_TITLE = "Display Error";
+
+    // If we are switching from / closing an editable panel, we must confirm that they wish to do so
+    private static final String SWITCH_TAB_PANEL_NAME = "Switch From Tab";
+    private static final String SWITCH_TAB_PANEL_MESSAGE = "The current tab is being edited.\n"
+            + "\nSwitching / closing it will result in unsaved changes being discarded."
+            + "\nConfirm switching / closing the current tab:";
 
     // Signal panel names
     private static final String SIGNAL_SERIES_NAME = "Samples";
@@ -53,6 +60,7 @@ public class ViewerTabPane extends JTabbedPane
         // Init the tab pane controller
         setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
         addChangeListener(viewerTabPaneController);
+        addMouseListener(viewerTabPaneController);
     }
 
     public ViewerSidePanel getViewerSidePanel()
@@ -185,26 +193,55 @@ public class ViewerTabPane extends JTabbedPane
             return;
 
         // If the object exists, remove it from the tab
-        final int existingTabIndex = getExistingTabObjectIndex(object);
+        final int existingTabIndex = getExistingTabObjectIndex(getSelectedIndex());
         if (existingTabIndex == -1)
             return;
         closeObjectTabPanel(existingTabIndex);
     }
 
-    public synchronized void closeObjectTabPanel(final int existingTabIndex)
+    public synchronized void closeObjectTabPanel(final int tabIndex)
     {
+        if (tabIndex == -1)
+            return;
+        else if (!switchFromEditablePanel(tabIndex))
+            return;
+
         // Get the tab that correlates to the index
-        TabPanel tabPanel = (TabPanel) getTabComponentAt(existingTabIndex);
+        TabPanel tabPanel = (TabPanel) getTabComponentAt(tabIndex);
         if (tabPanel == null)
             return;
 
         // Remove the tab from the viewer tab panel
-        removeTabAt(existingTabIndex);
+        removeTabAt(tabIndex);
 
         // If there is one or less side views open, close it!
         final int existingSideViews = getNumTabsReferencingSideViewObject(tabPanel.getSideObject());
         if (existingSideViews > 1)
             return;
         viewerSidePanel.closeObjectStructurePanels(tabPanel.getSideObject());
+    }
+
+    public boolean switchFromEditablePanel(final int tabIndex)
+    {
+        System.out.println("HERE");
+        if (tabIndex == -1)
+            return true;
+        else if (!(getComponentAt(tabIndex) instanceof EditablePanel))
+            return true;
+
+        // If the editable panel is not being edited, we can switch away from it
+        final EditablePanel editablePanel = (EditablePanel) getComponentAt(tabIndex);
+        if (!editablePanel.isBeingEdited())
+            return true;
+
+        // Get the user to confirm that that are switching away from the tab
+        final int confirm = JOptionPane.showConfirmDialog(
+                MainWindow.getInstance(),
+                SWITCH_TAB_PANEL_MESSAGE,
+                SWITCH_TAB_PANEL_NAME,
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE
+        );
+        return confirm == JOptionPane.YES_OPTION;
     }
 }

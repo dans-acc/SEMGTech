@@ -18,13 +18,10 @@ import com.semgtech.display.windows.MainWindow;
 import javax.sound.sampled.AudioFormat;
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 
-public class ExplorerTreeController implements MouseListener, ActionListener
+public class ExplorerTreeController extends TreeController<DefaultTreeModel, ExplorerTreePopup, ExplorerTree>
 {
 
     // Option panel new simulation titles, messages and input names
@@ -37,8 +34,8 @@ public class ExplorerTreeController implements MouseListener, ActionListener
     private static final String RENAME_OPTION_MESSAGE = "Provide the new name of the selected object:";
 
     // Option panel delete title and message
-    private static final String DELETE_OPTION_TITLE = "Delete";
-    private static final String DELETE_OPTION_MESSAGE = "Confirm the deletion of the selected nodes?";
+    private static final String DELETE_PANEL_TITLE = "Delete";
+    private static final String DELETE_PANEL_MESSAGE = "Confirm the deletion of the selected nodes?";
 
     // Magnitude and phase names
     private static final String MAGNITUDE_NEW_NAME = "%s Magnitude Spectrum";
@@ -53,117 +50,75 @@ public class ExplorerTreeController implements MouseListener, ActionListener
     private static final String CROSS_CORRELATION_MAX_LAG_OPTION_EXCEPTION = "\n(Ensure that the input is an integer between 0 and %d)";
     private static final String CROSS_CORRELATION_NEW_NAME = "%s and %s Cross-Correlation";
 
-    // The explorer tree the controller belongs to
-    private ExplorerTree explorerTree;
-
     public ExplorerTreeController(final ExplorerTree explorerTree)
     {
-        this.explorerTree = explorerTree;
+        super(explorerTree);
     }
 
+    /**
+     * Handles a double click event. Method deals with DefaultMutableTreeNodes only.
+     * When a valid DefaultMutableTreeNode is clicked, the user object is obtained
+     * and subsequently displayed in the viewer panel.
+     *
+     * @param object - the object that was double clicked.
+     */
     @Override
-    public void mouseClicked(final MouseEvent mouseEvent)
+    public void handleClick(final Object object)
     {
-        if (mouseEvent.getSource() != explorerTree)
+        if (!(object instanceof DefaultMutableTreeNode))
             return;
 
-        // Get the selected row within the explorer tree
-        final int selectedRow = explorerTree.getRowForLocation(mouseEvent.getX(), mouseEvent.getY());
-        final TreePath selectedPath = explorerTree.getPathForRow(selectedRow);
-        if (selectedRow == -1 || selectedPath == null) {
-            explorerTree.clearSelection();
-            return;
-        }
+        // Cast as DefaultMutableTreeNode, get the object.
+        final DefaultMutableTreeNode node = (DefaultMutableTreeNode) object;
+        final Object userObject = node.getUserObject();
 
-        // Deal only with double clicks
-        if (mouseEvent.getClickCount() >= 2)
-            return;
-
-        // Get the node that was clicked
-        final DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) selectedPath.getLastPathComponent();
-        if (selectedNode == null)
-            return;
-
-        // Display the selected node
-        final Object userObject = selectedNode.getUserObject();
+        // Display the selected user object
         MainWindow.getInstance().getViewerMainPanel().displayObjectPanels(userObject, userObject, true);
     }
 
+    /**
+     * We're having to override this method since this tree deals with DefaultMutableTreeNode's
+     * directly. Thus, we're having to 'extract' the desired objects.
+     *
+     * @param paths - the nodes that are selected in the tree
+     * @return - an array of objects for which the nodes have been selected
+     */
     @Override
-    public void mousePressed(final MouseEvent mouseEvent)
+    protected Object[] getSelectedObjects(final TreePath... paths)
     {
-        // Handle only popup menus
-        if (!mouseEvent.isPopupTrigger())
-            return;
-
-        // Get all of the selected objects
-        final Object[] selectedObjects = getSelectedObjects(explorerTree.getSelectionPaths());
-
-        // Disable / enable options based on what is selected
-        explorerTree.getExplorerTreePopup().enableMenuItemsFor(selectedObjects);
-        explorerTree.getExplorerTreePopup().show(
-                explorerTree,
-                mouseEvent.getX(),
-                mouseEvent.getY()
-        );
-    }
-
-    @Override
-    public void mouseReleased(final MouseEvent mouseEvent) { }
-    @Override
-    public void mouseEntered(final MouseEvent mouseEvent) { }
-    @Override
-    public void mouseExited(final MouseEvent mouseEvent) { }
-
-
-    private Object[] getSelectedObjects(final TreePath... selectedPaths)
-    {
-        // If there are no paths selected, return null
-        if (selectedPaths == null || selectedPaths.length == 0)
+        final Object[] defaultMutableTreeNodes = super.getSelectedObjects(paths);
+        if (defaultMutableTreeNodes == null)
             return null;
-
-        // Get all the selected object instances from within the DefaultMutableNodes
-        final Object[] selectedObjects = new Object[selectedPaths.length];
-        for (int index = 0; index < selectedPaths.length; ++index)
-            selectedObjects[index] = ((DefaultMutableTreeNode) selectedPaths[index].getLastPathComponent()).getUserObject();
-
+        final Object[] selectedObjects = new Object[defaultMutableTreeNodes.length];
+        for (int index = 0; index < defaultMutableTreeNodes.length; ++index)
+            selectedObjects[index] = ((DefaultMutableTreeNode) defaultMutableTreeNodes[index]).getUserObject();
         return selectedObjects;
     }
 
     @Override
-    public void actionPerformed(final ActionEvent actionEvent)
+    protected boolean handleAction(final Object source, final ExplorerTreePopup popup,
+                                   final TreePath[] paths, final Object[] objects)
     {
-        // Get the explorer popup, and the option selected
-        final ExplorerTreePopup explorerTreePopup = explorerTree.getExplorerTreePopup();
-        final Object source = actionEvent.getSource();
-
-        // Get all the selected paths and objects
-        final TreePath[] selectedPaths = explorerTree.getSelectionPaths();
-        final Object[] selectedObjects = getSelectedObjects(selectedPaths);
-
-        // Determine the next course of action
-        if (source == explorerTreePopup.getNewSimulationItem())
-            newSimulation();
-        else if (source == explorerTreePopup.getRefactorRenameItem())
-            renameObject(selectedPaths, selectedObjects);
-        else if (source == explorerTreePopup.getDeleteItem())
-            deleteObject(selectedPaths);
-        else if (source == explorerTreePopup.getFourierMagnitudeSpectrumItem())
-            computeSignalMagnitudeSpectrum(selectedPaths, selectedObjects);
-        else if (source == explorerTreePopup.getFourierPhaseSpectrumItem())
-            computeSignalPhaseSpectrum(selectedPaths, selectedObjects);
-        else if (source == explorerTreePopup.getCorrelationAutoCorrelationItem())
-            computeSignalAutoCorrelation(selectedPaths, selectedObjects);
-        else if (source == explorerTreePopup.getCorrelationCrossCorrelationItem())
-            computeSignalCrossCorrelation(selectedPaths, selectedObjects);
-        else if (source == explorerTreePopup.getNormaliseItem())
-            normaliseSignal(selectedPaths, selectedObjects);
-
-        // Repaint the explorer tree
-        explorerTree.repaint();
+        if (source == popup.getNewSimulationItem())
+            return handleNewSimulation();
+        else if (source == popup.getRefactorRenameItem())
+            return handleRefactorRename(paths, objects);
+        else if (source == popup.getDeleteItem())
+            return handleDeletion(paths, objects);
+        else if (source == popup.getFourierMagnitudeSpectrumItem())
+            return handleMagnitudeSpectrum(paths, objects);
+        else if (source == popup.getFourierPhaseSpectrumItem())
+            return handlePhaseSpectrum(paths, objects);
+        else if (source == popup.getCorrelationAutoCorrelationItem())
+            return handleAutoCorrelation(paths, objects);
+        else if (source == popup.getCorrelationCrossCorrelationItem())
+            return handleCrossCorrelation(paths, objects);
+        else if (source == popup.getNormaliseItem())
+            return handleNormalisation(paths, objects);
+        return false;
     }
 
-    private void newSimulation()
+    private boolean handleNewSimulation()
     {
         // The names of the simulation types
         final String[] simulationTypeNames = new String[] {
@@ -191,7 +146,7 @@ public class ExplorerTreeController implements MouseListener, ActionListener
                     JOptionPane.OK_CANCEL_OPTION
             );
             if (option == JOptionPane.CANCEL_OPTION)
-                return;
+                return false;
         } while (simulationName.getText() == null || simulationName.getText().isEmpty());
 
         AudioFormat format = new AudioFormat(1000, 16, 1, false, true);
@@ -202,18 +157,14 @@ public class ExplorerTreeController implements MouseListener, ActionListener
                 : new KaghazchiAnatomicSimulator(simulationName.getText(), null, format);
 
         // Add the simulator to the tree and display it
-        explorerTree.addChildObject(
-                explorerTree.getModel().getRoot(),
-                simulator, true
-        );
+        tree.addChild(tree.getModel().getRoot(), simulator, true);
+        return true;
     }
 
-    private void renameObject(final TreePath[] selectedPaths, final Object[] selectedObjects)
+    @SuppressWarnings("Duplicates")
+    private boolean handleRefactorRename(final TreePath[] selectedPaths, final Object[] selectedObjects)
     {
-        // Get the object that's to be renamed
-        final Object selectedObject = selectedObjects[0];
-
-        // Obtain the new name via user input
+        final DefaultMutableTreeNode selectedObject = (DefaultMutableTreeNode) selectedObjects[0];
         String name = null;
         do {
             name = JOptionPane.showInputDialog(
@@ -223,12 +174,12 @@ public class ExplorerTreeController implements MouseListener, ActionListener
                     JOptionPane.QUESTION_MESSAGE
             );
         } while (name != null && name.isEmpty());
-
-        // If the name is valid, and exists, we can set the object name
         if (name == null)
-            return;
+            return false;
         setObjectName(selectedObject, name);
-        explorerTree.getModel().reload((DefaultMutableTreeNode) selectedPaths[0].getLastPathComponent());
+        tree.getModel().reload(selectedObject);
+        //explorerTree.getModel().reload((DefaultMutableTreeNode) selectedPaths[0].getLastPathComponent());
+        return true;
     }
 
     private void setObjectName(final Object selectedObject, final String name)
@@ -243,53 +194,57 @@ public class ExplorerTreeController implements MouseListener, ActionListener
             ((SignalCorrelation) selectedObject).setName(name);
     }
 
-    private void deleteObject(final TreePath[] selectedPaths)
+    @SuppressWarnings("Duplicates")
+    private boolean handleDeletion(final TreePath[] paths, final Object[] objects)
     {
         // Confirm the deletion of the selected objects
         final int selected = JOptionPane.showConfirmDialog(
                 MainWindow.getInstance(),
-                DELETE_OPTION_MESSAGE,
-                DELETE_OPTION_TITLE,
+                DELETE_PANEL_MESSAGE,
+                DELETE_PANEL_TITLE,
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.QUESTION_MESSAGE
         );
 
         // Check whether the user has confirmed the deletion
-        if (selected != 0)
-            return;
+        if (selected == JOptionPane.NO_OPTION)
+            return false;
 
-        // Loop through the paths, deleting the selected nodes
-        DefaultMutableTreeNode treeNode = null;
-        for (final TreePath treePath : selectedPaths) {
-            treeNode = (DefaultMutableTreeNode) treePath.getLastPathComponent();
-            explorerTree.getModel().removeNodeFromParent(treeNode);
-            //MainWindow.getInstance().getViewerMainPanel().closeObjectPanels(treeNode.getUserObject());
+        // Loop through all of the paths, closing their tabs / side panels and removing them from the tree.
+        DefaultMutableTreeNode node = null;
+        for (final TreePath path : paths) {
+            node = (DefaultMutableTreeNode) path.getLastPathComponent();
+            MainWindow.getInstance().getViewerMainPanel().getViewerTabPane().closeObjectTabPanel(node.getUserObject());
+            tree.removeChild(path);
         }
+        return true;
     }
 
-    private void computeSignalMagnitudeSpectrum(final TreePath[] selectedPaths, final Object[] selectedObjects)
+    private boolean handleMagnitudeSpectrum(final TreePath[] selectedPaths, final Object[] selectedObjects)
     {
         Signal signal = null;
         MagnitudeSpectrum magnitudeSpectrum = null;
         for (int index = 0; index < selectedObjects.length; ++index) {
             signal = (Signal) selectedObjects[index];
             magnitudeSpectrum = new MagnitudeSpectrum(String.format(MAGNITUDE_NEW_NAME, signal), signal);
-            explorerTree.addChildObject(selectedPaths[index], magnitudeSpectrum, false, true);
+            tree.addChild(selectedPaths[index], magnitudeSpectrum, false, true);
         }
+        return true;
     }
 
-    private void computeSignalPhaseSpectrum(final TreePath[] selectedPaths, final Object[] selectedObjects)
+    private boolean handlePhaseSpectrum(final TreePath[] selectedPaths, final Object[] selectedObjects)
     {
         Signal signal = null;
         PhaseSpectrum phaseSpectrum = null;
         for (int index = 0; index < selectedObjects.length; ++index) {
             signal = (Signal) selectedObjects[index];
             phaseSpectrum = new PhaseSpectrum(String.format(PHASE_NEW_NAME, signal), signal);
-            explorerTree.addChildObject(selectedPaths[index], phaseSpectrum, false, true);
+            tree.addChild(selectedPaths[index], phaseSpectrum, false, true);
         }
+        return true;
     }
 
-    private void computeSignalAutoCorrelation(final TreePath[] selectedPaths, final Object[] selectedObjects)
+    private boolean handleAutoCorrelation(final TreePath[] selectedPaths, final Object[] selectedObjects)
     {
         Signal signal = null;
         AutoCorrelation autoCorrelation = null;
@@ -297,11 +252,12 @@ public class ExplorerTreeController implements MouseListener, ActionListener
             signal = (Signal) selectedObjects[index];
             autoCorrelation = new AutoCorrelation(String.format(AUTO_CORRELATION_NEW_NAME, signal),
                     signal.getSampledAmplitudes().length, false, signal);
-            explorerTree.addChildObject(selectedPaths[index], autoCorrelation, false, true);
+            tree.addChild(selectedPaths[index], autoCorrelation, false, true);
         }
+        return true;
     }
 
-    private void computeSignalCrossCorrelation(final TreePath[] selectedPaths, final Object[] selectedObjects)
+    private boolean handleCrossCorrelation(final TreePath[] selectedPaths, final Object[] selectedObjects)
     {
         // Get the two signals that are to be cross-correlated
         final Signal signalX = (Signal) selectedObjects[0],
@@ -331,7 +287,7 @@ public class ExplorerTreeController implements MouseListener, ActionListener
 
         // The user did not want to compute the cross correlation coefficients between the two signals
         if (input == null)
-            return;
+            return false;
 
         // Compute the cross-correlation coefficients of the two signals
         final CrossCorrelation crossCorrelation = new CrossCorrelation(
@@ -340,17 +296,27 @@ public class ExplorerTreeController implements MouseListener, ActionListener
         );
 
         // Add the cross correlated object to the explorer tree
-        explorerTree.addChildObject(selectedPaths[0], crossCorrelation, false, true);
+        tree.addChild(selectedPaths[0], crossCorrelation, false, true);
+        return true;
     }
 
-    private void normaliseSignal(final TreePath[] selectedPaths, final Object[] selectedObjects)
+    /**
+     * Method normalises the selected signals
+     *
+     * @param selectedPaths - the paths of the signals that are to be normalised
+     * @param selectedObjects - objects (signals) corresponding to the paths
+     * @return true or false based on whether or not the normalisation was successful
+     */
+    private boolean handleNormalisation(final TreePath[] selectedPaths, final Object[] selectedObjects)
     {
         Signal normalisedSignal = null;
         for (int index = 0; index < selectedObjects.length; ++index) {
             normalisedSignal = selectedObjects[index] instanceof LoggedSignal
                     ? ((LoggedSignal) selectedObjects[index]).normalise()
                     : ((Signal) selectedObjects[index]).normalise();
-            explorerTree.addChildObject(selectedPaths[index], normalisedSignal, true, true);
+
+            tree.addChild(selectedPaths[index], normalisedSignal, true, true);
         }
+        return true;
     }
 }

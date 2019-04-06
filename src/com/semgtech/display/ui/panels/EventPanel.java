@@ -1,41 +1,89 @@
 package com.semgtech.display.ui.panels;
 
-import com.semgtech.api.utils.signals.LoggedSignal;
-import com.semgtech.display.ui.trees.EventTree;
+import com.semgtech.api.utils.signals.events.EventComponent;
 
 import javax.swing.*;
-import javax.swing.border.TitledBorder;
-import java.awt.*;
 
-public class EventPanel extends SideView<LoggedSignal>
+public class EventPanel extends EditablePanel
 {
 
-    private static final String EVENT_PANEL_NAME = "Signal Events";
+    // Name and tooltip for the events duration
+    private static final String DURATION_FIELD_NAME = "Duration (ms):";
+    private static final String DURATION_FIELD_TOOLTIP = "The duration of the event.";
 
-    private EventTree eventTree;
+    // Name and tooltip for the event starting time
+    private static final String STARTING_TIME_FILED_NAME = "Started (ms):";
+    private static final String STARTING_TIME_FIELD_TOOLTIP = "The time at which the event begun.";
 
-    public EventPanel(final LoggedSignal loggedSignal)
+    // Name and tooltip for the event ending time
+    private static final String ENDING_TIME_FIELD_NAME = "Ended (ms):";
+    private static final String ENDING_TIME_FIELD_TOOLTIP = "The time at which the event ended";
+
+    // The logged signal for which the event exists
+    private EventComponent eventComponent;
+
+    // The duration of the event
+    private JLabel durationLabel;
+
+    // Starting and ending time fields
+    private JTextField startingTimeTextField;
+    private JTextField endingTimeTextField;
+
+    public EventPanel(final EventComponent eventComponent)
     {
-        super(loggedSignal);
-
-        // Create the event tree
-        eventTree = new EventTree(loggedSignal);
-        final JScrollPane eventTreeScrollPane = new JScrollPane(eventTree);
-        eventTreeScrollPane.setBorder(BorderFactory.createLoweredBevelBorder());
-
-        // Create the event tree panel
-        setBorder(BorderFactory.createTitledBorder(
-                BorderFactory.createEmptyBorder(),
-                EVENT_PANEL_NAME,
-                TitledBorder.LEFT,
-                TitledBorder.TOP
-        ));
-        setLayout(new BorderLayout());
-        add(eventTreeScrollPane, BorderLayout.CENTER);
+        super();
+        this.eventComponent = eventComponent;
+        updateEditComponents();
     }
 
-    public EventTree getEventTree()
+    public EventComponent getEventComponent()
     {
-        return eventTree;
+        return eventComponent;
     }
+
+    @Override
+    public void initContentPanel()
+    {
+        // Create the duration label
+        durationLabel = new JLabel();
+        addEditableComponent(DURATION_FIELD_NAME, DURATION_FIELD_TOOLTIP, durationLabel);
+
+        // Create the starting time field
+        startingTimeTextField = new JTextField();
+        addEditableComponent(STARTING_TIME_FILED_NAME, STARTING_TIME_FIELD_TOOLTIP, startingTimeTextField);
+
+        // Create the ending time component
+        endingTimeTextField = new JTextField();
+        addEditableComponent(ENDING_TIME_FIELD_NAME, ENDING_TIME_FIELD_TOOLTIP, endingTimeTextField);
+    }
+
+    @Override
+    public void makePanelEditable(final boolean editable)
+    {
+        // Enable / disable the fields
+        durationLabel.setEnabled(editable);
+        startingTimeTextField.setEnabled(editable);
+        endingTimeTextField.setEnabled(editable);
+    }
+
+    @Override
+    public boolean canApplyEdits()
+    {
+        return true;
+    }
+
+    @Override
+    public void applyEdits()
+    {
+
+    }
+
+    @Override
+    public void updateEditComponents()
+    {
+        durationLabel.setText(Float.toString(eventComponent.getDuration()));
+        startingTimeTextField.setText(Float.toString(eventComponent.getTimeBegan()));
+        endingTimeTextField.setText(Float.toString(eventComponent.getTimeEnded()));
+    }
+
 }
